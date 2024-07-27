@@ -1,17 +1,18 @@
 import multiparty from "multiparty"
-import cloudinary from "clouadinary";
+import cloudinary from "cloudinary";
 import { mongooseConnect } from "@/lib/mongoose";
 
 cloudinary.v2.config({
-    clouad_name: process.env.CLOUDINARY_CLOUD_NAME,
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
 })
 
+
 export default async function handle(req, res) {
     await mongooseConnect();
 
-    const form = multiparty.Form()
+    const form = new multiparty.Form()
     const { fields, files } = await new Promise((resolve, reject) => {
         form.parse(req, (err, fields, files) => {
             if (err) reject(err);
@@ -22,15 +23,17 @@ export default async function handle(req, res) {
     const links = [];
     for (const file of files.file) {
         const result = await cloudinary.v2.uploader.upload(file.path, {
-            folder: "masterhub",
+            folder: "ecommerce",
             public_id: `file_${Date.now()}`,
             resource_type: 'auto',
         })
 
         const link = result.secure_url;
-        link.push(link);
+        links.push(link);
     }
+    // console.log({ links })
+    res.json({ links });
 }
 export const config = {
     api: { bodyParser: false }
-}
+} 
