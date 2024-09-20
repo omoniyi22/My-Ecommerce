@@ -5,7 +5,7 @@ export default function NewProduct() {
         <div className="sm:flex flex-col *:sm:items-center sm:justify-between py-3">
             <div className="text-center sm:text-left pb-4">
                 <p className="mt-1.5 text-md text-gray-500 max-w-lg">
-                    Let's create a new product! 🎉
+                    Let&rsquo;s create a new product! 🎉
                 </p>
             </div>
 
