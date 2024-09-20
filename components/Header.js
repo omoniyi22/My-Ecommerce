@@ -2,8 +2,6 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-
-
 export default function Header() {
 
     const router = useRouter()
@@ -15,7 +13,9 @@ export default function Header() {
     const inActive = 'text-gray-500 transition hover:text-gray-500/75 p-3'
 
     const { data: session } = useSession()
-    if (session)
+
+    if (session?.user) {
+        console.log({ session })
         return (
             <header className="bg-white border-b top-0 sticky">
                 <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
@@ -78,4 +78,5 @@ export default function Header() {
                 </div>
             </header>
         )
+    }
 }

@@ -7,8 +7,6 @@ const draggableList = [
 
 export default function App() {
 
-
-
     const [list, setList] = React.useState(draggableList);
 
     return (

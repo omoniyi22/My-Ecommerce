@@ -6,8 +6,9 @@ import Link from "next/link";
 export default function Home() {
 
   const { data: session } = useSession()
+  console.log({ session })
 
-  if (session) {
+  if (session?.user) {
     return <>
       <header className="bg-white">
         <div className="mx-auto max-w-screen-2xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
@@ -69,23 +70,21 @@ export default function Home() {
         <div className="h-32 rounded-lg bg-gray-200"></div>
       </div>
     </>
-  }
-
-
-  return (
-    <div className="flex flex-col min-h-screen justify-center items-center max-w-4xl m-auto">
-      <h1 className="text-4xl font-bold max-w-lg text-center">Welcome to the admin of the website</h1>
-      <p className="font-medium my-4"> An account is needed to view this page</p>
-      <button
-        className="inline-block rounded border border-blue-600 bg-blue-600 
+  } else
+    return (
+      <div className="flex flex-col min-h-screen justify-center items-center max-w-4xl m-auto">
+        <h1 className="text-4xl font-bold max-w-lg text-center">Welcome to the admin of the website</h1>
+        <p className="font-medium my-4"> An account is needed to view this page</p>
+        <button
+          className="inline-block rounded border border-blue-600 bg-blue-600 
         px-12 py-3 text-sm font-medium text-white hover:bg-transparent 
         hover:text-blue-600 focus:outline-none focus:ring active:text-blue-500"
-        href="/download"
-        onClick={() => signIn("google")}
-      >
-        Sign In with Google
-      </button>
-    </div>
+          href="/download"
+          onClick={() => signIn("google")}
+        >
+          Sign In with Google
+        </button>
+      </div>
 
-  );
+    );
 }

@@ -8,7 +8,6 @@ cloudinary.v2.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 })
 
-
 export default async function handle(req, res) {
     await mongooseConnect();
 

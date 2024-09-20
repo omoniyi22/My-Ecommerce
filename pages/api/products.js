@@ -14,11 +14,42 @@ export default async function handle(req, res) {
         })
         res.json(productDoc);
     }
+
+    if (method === "GET") {
+        if (req.query?.id) {
+            let data = await Product.findById(req.query.id)
+            res.json(data);
+        } else {
+            res.json(await Product.find());
+        }
+    }
+
+    if (method == "PUT") {
+        const { title, description, price, images, _id } = req.body
+        await Product.updateOne({
+            _id
+        }, {
+            title, description, price, images
+        })
+        res.json(true)
+    }
+
     if (method === "DELETE") {
-        if (req.query.id) {
-            await Product.deleteOne({ _id: res.query.id })
-            res.json({message: "Deleted"})
-            res.json(true)
+        if (req.query?.id) {
+            try {
+                const result = await Product.findOneAndDelete({ _id: req.query?.id });
+                if (!result) {
+                    console.log('No document was deleted. It might not exist.');
+                } else {
+                    console.log('Deleted product:', result);
+                    res.json({ message: "Deleted" })
+                    res.json(true)
+                }
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                res.json({ error: "Deleted" })
+                res.json(true)
+            }
         }
     }
 } 

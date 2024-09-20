@@ -1,9 +1,28 @@
+import axios from "axios";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react"
+
+const formatPrice = (price) => {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
 
 export default function Products() {
+    const [products, setProducts] = useState([]);
+
+    const isMounted = useRef(null);
+
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+        axios.get("/api/products").then(res => {
+            console.log({data: res.data})
+            setProducts(res.data);
+            setLoading(false)
+        })
+    }, [isMounted])
+
     return (
         <>
-            <header className="bg-indigo">
+            <header ref={isMounted} className="bg-indigo">
                 <div className="mx-auto max-w-screen-2xl px-4 py-6 sm:px-6 sm:py-12 lg:px-8">
                     <div className="sm:flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
@@ -37,7 +56,45 @@ export default function Products() {
 
 
             <div className="mx-auto max-w-screen-2xl px-4 py-6 sm:py-12 lg:px-8">
-                no products
+                {products.length === 0 ? (
+                    <p> no products</p>
+                ) : (
+                    // <p> Products Found {products.length}</p>
+
+
+                    <div class="">
+                        <table class="w-full border-collapse bg-white text-left text-sm text-gray-500">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-4 font-medium text-gray-900"></th>
+                                    <th scope="col" class="px-6 py-4 font-medium text-gray-900">Name</th>
+                                    <th scope="col" class="px-6 py-4 font-medium text-gray-900">Description</th>
+                                    <th scope="col" class="px-6 py-4 font-medium text-gray-900">Price</th>
+                                    <th scope="col" class="px-6 py-4 font-medium text-gray-900"></th>
+                                </tr>
+                            </thead>
+
+                            {products.map((product, index) => (
+                                <tbody class="divide-y divide-gray-100 border-t border-gray-100" key={product._id}>
+                                    <tr>
+                                        <th class="px-6 py-4 font-medium text-gray-900">{index + 1}</th>
+                                        <td class="px-6 py-4">{product.title}</td>
+                                        <td class="px-6 truncate  py-4 max-w-xs "> {product.description}</td>
+                                        <td class="px-6 py-4">
+                                            {formatPrice(product.price)}
+                                        </td>
+                                        <td class="flex justify-end gap-4 px-6 py-4 font-medium ">
+                                            <Link href={`/products/delete/` + product._id} className="text-red-700">Delete</Link>
+                                            <Link href={`/products/edit/` + product._id} class="text-green-700">Edit</Link>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            ))}
+                        </table>
+                    </div>
+
+                )}
             </div>
         </>
     )

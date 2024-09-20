@@ -3,19 +3,28 @@ import axios from "axios"
 import { useRouter } from "next/router"
 import Spinner from "./Spinner"
 import { ReactSortable } from 'react-sortablejs';
+import toast from "react-hot-toast";
 
-export default function Product({ }) {
+export default function Product({
+    _id,
+    title: existingTitle,
+    description: existingDescription,
+    price: existingPrice,
+    images: existingImages
+}) {
 
-    const uploadImagesQueue = []
-    const [isUploading, setIsUploading] = useState(false)
+
     const router = useRouter()
-
     const [redirect, setRedirect] = useState(false)
-    const [title, setTitle] = useState("")
-    const [description, setDescription] = useState("")
-    const [price, setPrice] = useState("")
-    const [imageList, setImageList] = useState([1, 2, 3, 4])
-    const [images, setImages] = useState(uploadImagesQueue)
+    const [title, setTitle] = useState(existingTitle || "")
+    const [description, setDescription] = useState(existingDescription || "")
+    const [price, setPrice] = useState(existingPrice || "")
+    const [images, setImages] = useState(existingImages || [])
+    const [isUploading, setIsUploading] = useState(false)
+
+    const [imageList, setImageList] = useState([])
+
+    let uploadImagesQueue = []
 
     const createProject = async (ev) => {
         ev.preventDefault()
@@ -24,8 +33,21 @@ export default function Product({ }) {
             await Promise.all(uploadImagesQueue)
         }
 
-        const data = { title, description, price, images }
-        await axios.post('/api/products', data)
+        let stringUrls = [...images].map((link) => Object.keys(link)
+            .filter(key => !isNaN(key))
+            .map(key => link[key])
+            .join(''))
+
+        const data = { title, description, price, images: stringUrls }
+        if (_id) {
+            await axios
+                .put("/api/products", { ...data, _id })
+            toast.success("Product Updated")
+
+        } else {
+            await axios.post('/api/products', data)
+            toast.success("Product Created!")
+        }
         setRedirect(true)
     }
 
@@ -37,21 +59,25 @@ export default function Product({ }) {
                 for (const file of files) {
                     const data = new FormData();
                     data.append("file", file);
-
+                    // let oldImages = [...images]
                     uploadImagesQueue.push(
                         axios.post("/api/upload", data).then(res => {
-                            setImages(oldImages => [...oldImages, ...res.data.links])
+                            let res_data_links = res.data.links
+                            setImages(oldImages => ([...oldImages, ...res_data_links]))
                         })
                     )
                 }
-                let response = await Promise.all(uploadImagesQueue)
-                console.log(response)
+
+                await Promise.all(uploadImagesQueue)
+                uploadImagesQueue = []
 
                 setIsUploading(false)
             } else {
                 setIsUploading(false)
                 return 'An error Occured'
             }
+
+
         } catch (error) {
             setIsUploading(false)
             console.log(error)
@@ -75,7 +101,7 @@ export default function Product({ }) {
     }
 
 
-    function setUpda(Images) {
+    function updateImageOrder(Images) {
         setImages(Images)
     }
 
@@ -113,7 +139,6 @@ export default function Product({ }) {
                             <option value={""}>No category</option>
                             <option value={""}>Option02</option>
                             <option value={""}>Option03</option>
-
                         </select>
                     </div>
                 </div>
@@ -146,15 +171,13 @@ export default function Product({ }) {
                     }
                 </div>
 
-
-
                 {
                     !isUploading && (
                         <div className="grid grid-cols-2 gap-4">
                             <ReactSortable
                                 // filter=".addImageButtonContainer"
                                 list={Array.isArray(images) ? images : []}
-                                setList={setImageList}
+                                setList={setImages}
                                 animation={200}
                                 className="grid grid-cols-2 gap-4"
                             // dragClass="sortableDrag"
@@ -162,9 +185,11 @@ export default function Product({ }) {
                             >
 
                                 {Array.isArray(images) && images.map((link, index) => (
-                                    <div key={index} className=" relative group ">
-                                        <img src={link} alt="image" className="object-cover h-32 w-44
-                        rounded-md p-2" />
+                                    <div key={link} className=" relative group ">
+                                        <img src={Object.keys(link)
+                                            .filter(key => !isNaN(key))
+                                            .map(key => link[key])
+                                            .join('')} alt="image" className="object-cover h-32 w-44 rounded-md p-2" />
                                         <div className="absolute top-2 right-2 cursor-pointer group-hover:opacity-100 opacity-0 transition-opacity">
                                             <button onClick={() => handleDeleteImage(index)}>
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
